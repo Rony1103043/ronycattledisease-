@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cattle Disease & Treatment Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .symptom-checkbox:checked + label {
+            background-color: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+        .symptom-checkbox:focus + label {
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Cattle Disease & Treatment Guide</h1>
+            <p class="text-md text-gray-600 mt-2">Use the tools below to identify and learn about cattle diseases.</p>
+            <p class="text-lg font-bold text-blue-800 mt-4 p-2 bg-blue-100 rounded-lg inline-block">Developed by MD AKRAMUL HAQUE, BCS (Livestock), DLS, Bangladesh</p>
+        </header>
+
+        <main class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+            <!-- Direct Disease Lookup Section -->
+            <div id="direct-lookup" class="mb-8 pb-8 border-b border-gray-200">
+                <h2 class="text-2xl font-semibold mb-2 text-gray-800">Direct Disease Lookup</h2>
+                <p class="text-gray-600 mb-4">Select a disease directly from the list to see its details.</p>
+                <div class="flex flex-col sm:flex-row gap-3 items-center">
+                    <select id="disease-dropdown" class="w-full sm:flex-grow p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white">
+                        <!-- Options will be populated by JS -->
+                    </select>
+                    <button id="show-disease-btn" class="bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all duration-300 ease-in-out w-full sm:w-auto flex-shrink-0">
+                        Get Info
+                    </button>
+                </div>
+            </div>
+
+            <!-- Symptom Selection Section -->
+            <div id="symptom-selector">
+                <h2 class="text-2xl font-semibold mb-2 text-gray-800">Symptom-Based Diagnosis</h2>
+                 <p class="text-gray-600 mb-4">Select the signs your cattle are showing to find possible diseases.</p>
+                <div id="symptoms-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    <!-- Symptoms will be dynamically inserted here -->
+                </div>
+            </div>
+
+            <!-- Diagnose Button -->
+            <div class="text-center mt-8">
+                <button id="diagnose-btn" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 ease-in-out transform hover:scale-105">
+                    Diagnose from Symptoms
+                </button>
+            </div>
+
+            <!-- Results Section -->
+            <div id="results" class="mt-10 hidden">
+                <h2 class="text-2xl font-semibold mb-2 text-gray-800 border-t pt-6">2. Results</h2>
+                 <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-100" role="alert">
+                    <span class="font-bold">CRITICAL DISCLAIMER:</span> This tool provides general recommendations ONLY. Drug dosages depend on the animal's exact body weight, age, and health condition. You <span class="font-bold">MUST</span> consult a qualified veterinarian for an accurate diagnosis and prescription before administering any medication. Incorrect use of medicine can be dangerous.
+                </div>
+                <div id="results-list" class="space-y-6">
+                    <!-- Diagnosis results will be inserted here -->
+                </div>
+                 <div id="no-results" class="text-center p-6 bg-gray-50 rounded-lg hidden">
+                    <p class="text-gray-600 font-medium">No potential diseases found based on the selected symptoms. Please try a different combination or consult a vet.</p>
+                </div>
+            </div>
+        </main>
+        
+        <footer class="text-center mt-8 text-gray-500 text-sm">
+            <p>Built for informational purposes. Veterinary consultation is essential.</p>
+        </footer>
+    </div>
+
+    <script>
+        const diseaseData = [
+            // Viral Diseases
+            {
+                name: "Foot and Mouth Disease (FMD)",
+                symptoms: ["Blisters on mouth/feet/teats", "Excessive drooling", "Lameness", "Fever", "Loss of appetite", "Reduced milk yield", "Stringy/ropy saliva", "Smacking of lips"],
+                treatment: "No specific cure. Administer injectable NSAIDs for pain and fever. <strong>Generic:</strong> Ketoprofen. <strong>Example Brands:</strong> Ketovet (Tekno), Profen-100 (ACI). <strong>Dose:</strong> 1 ml per 33 kg body weight IM for 3 days. Use antibiotics to prevent secondary bacterial infections.",
+                supportive_treatment: "Wash mouth and foot lesions with a mild antiseptic (e.g., Povidone-Iodine solution) or saline solution. Provide soft, palatable food (e.g., green grass, rice gruel). Administer injectable B-Complex vitamins to boost appetite and speed recovery. <strong>Example Brands:</strong> B-Plex Vet, V-Plex.",
+                prevention: "Strict biosecurity. Routine vaccination is highly effective (FMD vaccine is widely available in Bangladesh). Quarantine new animals."
+            },
+            {
+                name: "Lumpy Skin Disease (LSD)",
+                symptoms: ["Firm skin nodules (1-5cm)", "Fever", "Loss of appetite", "Nasal discharge", "Watery eye discharge", "Swollen lymph nodes", "Swelling of limbs/brisket"],
+                treatment: "No specific antiviral. Administer NSAIDs for fever and pain for 3-5 days. <strong>Generic:</strong> Meloxicam or Ketoprofen. Use broad-spectrum antibiotics for 5-7 days to prevent secondary bacterial skin infections or pneumonia. <strong>Generic:</strong> Oxytetracycline.",
+                supportive_treatment: "Apply topical antiseptic wound spray on ruptured nodules. Administer injectable B-Complex and liver tonics (e.g., Hepaprotect) to support metabolism and recovery. Provide easy access to clean water and good quality feed.",
+                prevention: "Vaccination is the most effective control method (LSD Vaccine). Control insect vectors (flies, mosquitoes)."
+            },
+            {
+                name: "Ephemeral Fever (Three-Day Sickness)",
+                symptoms: ["Sudden fever", "Lameness", "Stiffness", "Muscle tremors", "Loss of appetite", "Reduced milk yield", "Shivering", "Recovery in 3-5 days"],
+                treatment: "Supportive care is the primary treatment. Administer NSAIDs for fever, pain, and inflammation. <strong>Generic:</strong> Meloxicam. <strong>Example Brands:</strong> Mel-vet (ACI), Melonex (Tekno). <strong>Dose:</strong> 1 ml per 25-30 kg body weight IM.",
+                supportive_treatment: "Ensure the animal is comfortable with soft bedding. Provide easy access to clean water and palatable feed. B-Complex vitamins can help restore appetite.",
+                prevention: "Control of insect vectors (mosquitoes, biting midges) is key. Vaccines are available in some countries but not common in Bangladesh."
+            },
+            {
+                name: "Infectious Bovine Rhinotracheitis (IBR)",
+                symptoms: ["High fever", "Red nose ('Rednose')", "Nasal discharge", "Coughing", "Watery eye discharge", "Conjunctivitis", "Abortion", "Loss of appetite"],
+                treatment: "Administer broad-spectrum antibiotics (e.g., Oxytetracycline LA) to control secondary bacterial pneumonia. <strong>Dose:</strong> 1 ml per 10 kg body weight IM.",
+                supportive_treatment: "Provide good nursing care in a well-ventilated, stress-free environment. Use NSAIDs for fever. B-Complex and Vitamin A injections can aid recovery of the respiratory lining.",
+                prevention: "Vaccination is the primary control method (IBR marker vaccines). Maintain a closed herd and quarantine new animals."
+            },
+            {
+                name: "Bovine Viral Diarrhea (BVD)",
+                symptoms: ["Fever", "Watery/loose feces (diarrhea)", "Nasal discharge", "Coughing", "Mouth ulcers", "Loss of appetite", "Abortion", "Birth of weak or persistently infected (PI) calves"],
+                treatment: "No specific antiviral. Administer antibiotics for secondary bacterial infections. PI animals must be culled as they are a constant source of infection.",
+                supportive_treatment: "Fluid therapy is crucial to combat dehydration from diarrhea. Use oral rehydration salts (ORS) or IV fluids. Provide NSAIDs for fever and B-complex to improve appetite.",
+                prevention: "Vaccination is key. Test the herd to identify and remove PI animals. Strict biosecurity."
+            },
+            {
+                name: "Rabies",
+                symptoms: ["Abnormal behavior (aggression or depression)", "Excessive drooling", "Bellowing", "Straining", "Paralysis (starting in hind limbs)", "Incoordination"],
+                treatment: "No treatment. Rabies is fatal. It is a severe zoonotic disease. If suspected, extreme caution is required. Contact veterinary authorities immediately.",
+                supportive_treatment: "None. Euthanasia is recommended to prevent suffering and human exposure.",
+                prevention: "Vaccination of cattle in high-risk areas. Control of stray dogs and wildlife vectors."
+            },
+            // Bacterial Diseases
+            {
+                name: "Hemorrhagic Septicemia (HS)",
+                symptoms: ["High fever", "Swelling of throat/neck", "Difficulty breathing", "Loud gurgling sound", "Excessive drooling", "Nasal discharge", "Depression", "Sudden death"],
+                treatment: "Early, aggressive antibiotic therapy is crucial. <strong>First choice:</strong> Injectable Oxytetracycline or Sulphonamides. <strong>Generic:</strong> Sulphadimidine 33.3%. <strong>Example Brands:</strong> Sulfon-S (Gonoshasthaya), Sulfadin (ACI). <strong>Dose:</strong> 30 ml per 50 kg body weight IV on the first day, then IM for 3-5 days.",
+                supportive_treatment: "Administer potent NSAIDs like Flunixin Meglumine to control fever and endotoxic shock. Provide fluid therapy (IV or oral) if the animal is dehydrated. Keep the animal in a calm environment.",
+                prevention: "Vaccination before the monsoon season is highly effective (HS vaccine)."
+            },
+            {
+                name: "Blackleg",
+                symptoms: ["Lameness", "Swelling with crackling sound", "Fever", "Loss of appetite", "Depression", "Sudden death"],
+                treatment: "Treatment is often unrewarding. If caught extremely early, high doses of Penicillin may be used. <strong>Generic:</strong> Procaine Penicillin. <strong>Dose:</strong> Very high doses (e.g., 22,000 IU/kg) under veterinary supervision.",
+                supportive_treatment: "Aggressive NSAID therapy for pain and shock. A veterinarian may surgically open and drain the affected muscle area.",
+                prevention: "Vaccination is highly effective. Use a clostridial vaccine like 'Blackovax' (provides protection against Blackleg and other clostridial diseases). Vaccinate calves at 3-4 months of age."
+            },
+            {
+                name: "Anthrax",
+                symptoms: ["Sudden death", "Blood from orifices (non-clotting)", "High fever", "Difficulty breathing", "Swelling of throat/neck", "Staggering/Wobbling", "Depression"],
+                treatment: "Treatment is rarely possible due to the rapid course. In very early cases, high doses of Penicillin or Oxytetracycline may be attempted by a vet. <strong>CRITICAL WARNING:</strong> Do NOT open the carcass of a suspected anthrax case.",
+                supportive_treatment: "Supportive care is generally not possible due to the rapid, fatal nature of the disease.",
+                prevention: "Annual vaccination in endemic areas is highly effective (Anthrax Spore Vaccine). Properly dispose of any suspected carcasses under veterinary supervision."
+            },
+            {
+                name: "Mastitis",
+                symptoms: ["Swollen/hot udder", "Clots or strings in milk", "Fever", "Loss of appetite", "Reduced milk yield", "Painful udder", "Watery milk", "Udder is hard"],
+                treatment: "Use intramammary antibiotics. <strong>Example Brands:</strong> Mastinil (Renata), Cloxaren-DC (ACI). <strong>Dose:</strong> Infuse one syringe per affected quarter. For systemic signs, use injectable antibiotics (e.g., Amoxicillin, Oxytetracycline).",
+                supportive_treatment: "Administer NSAIDs (e.g., Ketoprofen, Meloxicam) for pain and inflammation. Frequently strip the affected quarter to remove infected milk. Provide fluid therapy if the cow has a high fever and is off-feed.",
+                prevention: "Maintain clean and dry bedding. Practice good milking hygiene (e.g., teat dipping). Disinfect equipment."
+            },
+            {
+                name: "Pneumonia (BRD)",
+                symptoms: ["Coughing", "Rapid/shallow breathing", "Nasal discharge", "Fever", "Depression", "Loss of appetite", "Droopy ears", "Head extended"],
+                treatment: "Administer a broad-spectrum antibiotic. <strong>Generic:</strong> Long-acting Oxytetracycline. <strong>Example Brands:</strong> Terramycin LA (Renata), Oxytet 200 LA (ACI). <strong>Dose:</strong> 1 ml per 10 kg body weight IM.",
+                supportive_treatment: "Administer NSAIDs to reduce fever and lung inflammation. Provide B-Complex vitamins to stimulate appetite. Ensure good nursing care in a dry, well-ventilated shelter, away from drafts.",
+                prevention: "Vaccinate against respiratory viruses (IBR, BVD) and bacteria. Reduce stress. Ensure good ventilation."
+            },
+             {
+                name: "Tetanus",
+                symptoms: ["Stiffness", "Muscle tremors", "Lockjaw", "Sawhorse stance", "Protrusion of third eyelid", "Hypersensitivity to sound/touch"],
+                treatment: "Requires intensive veterinary care. Clean the wound thoroughly. Administer high doses of Penicillin and Tetanus Antitoxin.",
+                supportive_treatment: "Keep the animal in a dark, quiet, and calm environment with deep, soft bedding. Provide food and water at a comfortable height. A veterinarian may administer muscle relaxants.",
+                prevention: "Vaccination with Tetanus Toxoid, especially after any surgical procedure (like castration) or deep wound."
+            },
+             {
+                name: "Navel Ill (Omphalitis)",
+                symptoms: ["Swollen/painful navel", "Pus discharge from navel", "Fever", "Depression", "Loss of appetite", "Swollen joints (Joint Ill)", "Reluctance to move"],
+                treatment: "Requires prompt antibiotic treatment. <strong>Generic:</strong> Long-acting Oxytetracycline or Penicillin-Streptomycin. <strong>Example Brands:</strong> Oxytet 200 LA, Penstrep. <strong>Dose:</strong> Follow vet's prescription. The navel area should be cleaned with an antiseptic (e.g., Povidone-Iodine).",
+                supportive_treatment: "Administer NSAIDs for pain and fever, especially if joints are swollen ('Joint Ill'). Provide fluid therapy if the calf is dehydrated. Ensure the calf is in a clean, dry pen.",
+                prevention: "Ensure a clean and hygienic calving environment. Disinfect the calf's navel immediately after birth with 7% Tincture of Iodine. Ensure adequate colostrum intake."
+            },
+            {
+                name: "Salmonellosis",
+                symptoms: ["Severe watery diarrhea (often foul-smelling)", "Diarrhea with blood or mucus", "High fever", "Dehydration (sunken eyes)", "Depression", "Straining", "Abortion"],
+                treatment: "This is a serious condition requiring veterinary care. Antibiotics (e.g., Ceftiofur, Sulpha drugs) must be prescribed by a vet due to potential resistance.",
+                supportive_treatment: "Aggressive fluid therapy (oral and IV) is critical to survival. Administer NSAIDs to combat fever and endotoxemia. Probiotics can help restore gut function during recovery.",
+                prevention: "Strict biosecurity and hygiene. Isolate sick animals immediately. Avoid contamination of feed and water."
+            },
+            {
+                name: "Tuberculosis (TB)",
+                symptoms: ["Chronic cough", "Progressive weight loss", "Fluctuating fever", "Swollen lymph nodes", "Reduced milk yield", "Weakness"],
+                treatment: "Treatment is not attempted in livestock due to public health (zoonotic) risk. It is a reportable disease. National control programs are based on a 'test-and-cull' policy. Contact DLS authorities immediately if suspected.",
+                supportive_treatment: "None. Infected animals must be managed according to national regulations.",
+                prevention: "Regular herd testing with the Tuberculin skin test. Culling of positive reactors. Prevent contact with potentially infected wildlife."
+            },
+            {
+                name: "Foot Rot (Interdigital Necrobacillosis)",
+                symptoms: ["Lameness", "Swelling of the foot (between claws)", "Foul smell from foot", "Fever", "Loss of appetite", "Reduced milk yield"],
+                treatment: "Clean the foot thoroughly. A topical antiseptic spray can be applied. Systemic antibiotics are essential. <strong>Generic:</strong> Long-acting Oxytetracycline. <strong>Example Brands:</strong> Terramycin LA. <strong>Dose:</strong> A single injection of 1 ml per 10 kg body weight is often effective.",
+                supportive_treatment: "Administer NSAIDs for pain relief to improve comfort and mobility. Keep the animal on dry, clean ground until fully recovered.",
+                prevention: "Maintain dry and clean standing areas. Avoid deep, prolonged mud. Use footbaths (e.g., 5% Copper Sulfate or Zinc Sulfate solution) regularly."
+            },
+            {
+                name: "Calf Diphtheria (Necrotic Laryngitis)",
+                symptoms: ["Moist/painful cough", "Loud/harsh breathing sound", "Difficulty breathing", "Fever", "Loss of appetite", "Excessive drooling", "Head extended", "Swelling of throat/neck"],
+                treatment: "Requires prompt veterinary attention. Systemic antibiotics are essential. <strong>Generic:</strong> Sulphonamides or Oxytetracycline. <strong>Example Brands:</strong> Sulfadin (ACI), Terramycin LA (Renata). <strong>Dose:</strong> As per veterinary prescription.",
+                supportive_treatment: "NSAIDs like Ketoprofen or Flunixin are critical to reduce the painful swelling in the larynx. Provide soft, palatable feed and easy access to water. Keep the calf in a well-ventilated area.",
+                prevention: "Maintain good hygiene in calf housing. Avoid overcrowding. Prevent injuries to the mouth and throat from coarse feeds. Isolate sick animals."
+            },
+            // Protozoal & Parasitic Diseases
+            {
+                name: "Babesiosis (Redwater)",
+                symptoms: ["Red or dark brown urine", "High fever", "Anemia (pale gums/eyes)", "Weakness", "Loss of appetite", "Jaundice (yellowish gums/eyes)", "Staggering/Wobbling"],
+                treatment: "Specific anti-protozoal drugs are required. <strong>Generic:</strong> Diminazene Aceturate. <strong>Example Brands:</strong> Babenil 7% (Renata), Berenil. <strong>Dose:</strong> 3.5 mg/kg body weight (approx. 5 ml per 100 kg) IM.",
+                supportive_treatment: "In severe anemia, a blood transfusion may be needed. Administer blood tonics (Iron, Vitamin B12), liver tonics, and provide fluid therapy to support the kidneys. Keep the animal out of direct sun.",
+                prevention: "Effective tick control is the most important measure. Use acaricide sprays or pour-on solutions."
+            },
+             {
+                name: "Anaplasmosis",
+                symptoms: ["Anemia (pale gums/eyes)", "Jaundice (yellowish gums/eyes)", "High fever", "Weakness", "Depression", "Loss of appetite", "Constipation", "Abortion"],
+                treatment: "Requires prompt treatment with tetracycline antibiotics. <strong>Generic:</strong> Long-acting Oxytetracycline. <strong>Example Brands:</strong> Terramycin LA (Renata), Oxytet 200 LA (ACI). <strong>Dose:</strong> A high dose of 1 ml per 10 kg body weight IM.",
+                supportive_treatment: "Blood transfusions may be life-saving in severe cases. Administer blood tonics (Iron, Vitamin B12) and liver tonics. Avoid stressing the animal, as this can lead to collapse. Provide water and feed within easy reach.",
+                prevention: "Control of tick vectors is essential. Use regular acaricide treatments. Control of biting flies."
+            },
+            {
+                name: "Theileriosis",
+                symptoms: ["High fever", "Swollen lymph nodes", "Watery eye discharge", "Nasal discharge", "Difficulty breathing", "Anemia (pale gums/eyes)", "Weakness", "Loss of appetite"],
+                treatment: "Requires specific anti-protozoal drugs. The drug of choice is Buparvaquone. <strong>Example Brands:</strong> Butalex. <strong>Dose:</strong> 1 ml per 20 kg body weight (2.5 mg/kg) IM.",
+                supportive_treatment: "Provide NSAIDs for fever, antibiotics for secondary pneumonia, and liver tonics. Blood transfusion may be necessary. Good nursing care is critical.",
+                prevention: "Strict and regular tick control is the only effective prevention method. Regular application of effective acaricides. Quarantine new animals."
+            },
+            {
+                name: "Coccidiosis",
+                symptoms: ["Diarrhea with blood or mucus", "Straining", "Dehydration (sunken eyes)", "Weakness", "Poor growth", "Loss of appetite"],
+                treatment: "Administer a coccidiostat. <strong>Generic:</strong> Amprolium or Toltrazuril. <strong>Example Brands:</strong> Amprol (oral solution), Toltracox / Baycox (for Toltrazuril). <strong>Dose:</strong> Follow product label. Sulpha drugs are also effective.",
+                supportive_treatment: "Aggressive fluid therapy (oral or IV) is essential to correct dehydration. Provide B-complex vitamins. Antibiotics may be needed to control secondary bacterial gut infections.",
+                prevention: "Maintain high levels of hygiene. Keep bedding clean and dry. Avoid overcrowding. Ensure feed and water troughs are clean."
+            },
+            {
+                name: "Fascioliasis (Liver Fluke)",
+                symptoms: ["Weight loss", "Anemia (pale gums/eyes)", "Swelling under jaw ('Bottle Jaw')", "Diarrhea", "Reduced milk yield", "Poor growth"],
+                treatment: "Use a flukicide. <strong>Generic:</strong> Triclabendazole is effective against all stages. Nitroxynil is also common. <strong>Example Brands:</strong> Fasinex, Trizonil, Nitronex. <strong>Dose:</strong> Follow product instructions.",
+                supportive_treatment: "Provide a high-protein diet and supplement with blood tonics (Iron, B12) and liver tonics to help the animal recover from anemia and liver damage.",
+                prevention: "Control snail populations (intermediate host). Avoid grazing in marshy, wet areas. Regular deworming based on vet's schedule."
+            },
+            {
+                name: "Rumen Fluke (Paramphistomiasis)",
+                symptoms: ["Profuse watery diarrhea", "Weight loss", "Poor growth", "Anemia (pale gums/eyes)", "Swelling under jaw ('Bottle Jaw')", "Dehydration (sunken eyes)", "Weakness"],
+                treatment: "Use a flukicide effective against rumen flukes. <strong>Generic:</strong> Oxyclozanide. <strong>Example Brands:</strong> Zanil, Oxyclozan. <strong>Dose:</strong> Follow product instructions.",
+                supportive_treatment: "Fluid therapy is critical to combat severe dehydration. Provide blood tonics and a highly nutritious diet to help regain condition.",
+                prevention: "Control aquatic snail populations. Avoid grazing in waterlogged areas. Strategic deworming."
+            },
+            {
+                name: "Schistosomiasis (Nasal)",
+                symptoms: ["Snoring sound", "Difficulty breathing", "Nasal discharge with blood", "Shaking head", "Granular lesions inside nostrils", "Progressive weight loss"],
+                treatment: "Requires a specific dewormer. <strong>Generic:</strong> Praziquantel. <strong>Example Brands:</strong> Prazivet. <strong>Dose:</strong> Must be determined by a veterinarian.",
+                supportive_treatment: "Administer antihistamines to reduce the allergic reaction in the nasal passages. B-complex vitamins and good nutrition will support recovery.",
+                prevention: "Control snail populations in ponds and canals. Prevent cattle from grazing in or drinking from contaminated water bodies."
+            },
+            {
+                name: "Monieziasis (Tapeworm)",
+                symptoms: ["Tapeworm segments in feces", "Pot-belly", "Diarrhea", "Weight loss", "Poor growth", "Rough hair coat"],
+                treatment: "Administer a dewormer effective against tapeworms. <strong>Generic:</strong> Praziquantel. High doses of Albendazole can also work. <strong>Example Brands:</strong> Prazivet, Almex-Vet. <strong>Dose:</strong> Follow label.",
+                supportive_treatment: "Provide a balanced diet with adequate minerals and vitamins to help the animal regain condition. B-complex can improve appetite.",
+                prevention: "Regular deworming with an appropriate anthelmintic."
+            },
+            {
+                name: "Ascariasis (Calf Roundworm)",
+                symptoms: ["Poor growth", "Pot-belly", "Rough hair coat", "Diarrhea", "Constipation", "Coughing (in early stages)", "Loss of appetite"],
+                treatment: "Use a dewormer. <strong>Generic:</strong> Piperazine, Levamisole, or Fenbendazole. <strong>Example Brands:</strong> Parvex, Leva-Vet (ACI), Panacur. <strong>Dose:</strong> Treat calves as early as 2-3 weeks of age.",
+                supportive_treatment: "Deworming can sometimes cause impaction. Ensure good hydration. Provide B-Complex vitamins and a high-quality diet to support growth.",
+                prevention: "Strategic deworming of calves. Treat pregnant cows before they calve. Maintain clean, dry calving pens."
+            },
+            {
+                name: "Gastrointestinal Worms (PGE)",
+                symptoms: ["Diarrhea", "Weight loss", "Poor growth", "Rough hair coat", "Loss of appetite", "Anemia (pale gums/eyes)", "Bottle Jaw"],
+                treatment: "Administer a broad-spectrum anthelmintic. <strong>Generics:</strong> Albendazole, Ivermectin. <strong>Example Brands:</strong> Almex-Vet (ACI), Ivermec. <strong>Dose:</strong> Follow product label.",
+                supportive_treatment: "Provide good nutrition, B-complex, and blood tonics to combat anemia and weight loss. Fluid therapy may be needed if diarrhea is severe.",
+                prevention: "Strategic deworming program. Pasture rotation."
+            },
+            {
+                name: "Mange (Scabies)",
+                symptoms: ["Intense itching", "Hair loss", "Thickened/crusty skin", "Restlessness", "Lesions usually on neck, shoulders, tail base"],
+                treatment: "Injectable Ivermectin or Doramectin is highly effective. <strong>Example Brands:</strong> Ivermec (Tekno), Dectomax. <strong>Dose:</strong> 1 ml per 50 kg body weight, SC.",
+                supportive_treatment: "For severe itching, antihistamines can provide relief. Apply antiseptic creams to any open sores to prevent secondary bacterial infection.",
+                prevention: "Quarantine and treat new animals. Avoid overcrowding."
+            },
+            {
+                name: "External Parasites (Ticks, Lice, Fleas)",
+                symptoms: ["Visible parasites on skin/hair", "Restlessness", "Intense itching", "Anemia (pale gums/eyes)", "Hair loss", "Reduced weight gain"],
+                treatment: "Use injectable or pour-on endectocides. <strong>Generic:</strong> Ivermectin, Fipronil. <strong>Example Brands (Injectable):</strong> Ivermec. <strong>Example Brands (Pour-on/Spray):</strong> Fiprovet. <strong>Dose:</strong> 1 ml per 50 kg for Ivermectin-based injectables.",
+                supportive_treatment: "For heavy tick burdens causing anemia, provide blood tonics. Clean and treat any skin wounds caused by scratching or bites.",
+                prevention: "Regular application of acaricides. Keep housing clean."
+            },
+            // Reproductive Diseases
+            {
+                name: "Brucellosis",
+                symptoms: ["Abortion (late term)", "Retained placenta", "Swollen testicles (bulls)", "Weak calves born", "Reduced milk yield"],
+                treatment: "No effective cure for infected animals. Culling is often recommended. You MUST contact local DLS veterinary authorities immediately.",
+                supportive_treatment: "None.",
+                prevention: "Vaccination of female calves (S19 or RB51 vaccine). Test and remove positive animals. Strict biosecurity."
+            },
+            {
+                name: "Metritis / Endometritis (Uterine Infection)",
+                symptoms: ["Foul-smelling discharge from vulva", "Pus/mucus in discharge", "Fever", "Loss of appetite", "Reduced milk yield", "Straining", "Delayed return to heat"],
+                treatment: "Requires veterinary intervention. Treatment usually involves intrauterine infusion of antibiotics (e.g., Metricure) or systemic antibiotics and PGF2α hormone injections.",
+                supportive_treatment: "Administer NSAIDs for fever and pain. Provide fluid therapy if the animal is dehydrated. B-complex and liver tonics can aid recovery.",
+                prevention: "Maintain strict hygiene during and after calving. Ensure complete removal of the placenta."
+            },
+            {
+                name: "Pyometra",
+                symptoms: ["Pus discharge from vulva (often creamy white/yellow)", "Failure to get pregnant", "Irregular cycles", "Sometimes no visible external discharge (closed pyometra)"],
+                treatment: "The treatment of choice is hormonal. A veterinarian must administer an injection of Prostaglandin F2α (PGF2α). <strong>Generic:</strong> Cloprostenol. <strong>Example Brands:</strong> Ovuprost (Renata). <strong>Dose:</strong> Typically 2 ml per animal, IM. May need repeating.",
+                supportive_treatment: "Intrauterine antibiotics may be infused after the pus is expelled. Systemic antibiotics can be used if the animal shows systemic signs of illness. B-complex vitamins can support recovery.",
+                prevention: "Prompt and effective treatment of metritis. Maintain excellent hygiene during artificial insemination (AI) procedures."
+            },
+            {
+                name: "Orchitis (Inflammation of Testicles)",
+                symptoms: ["Swollen testicles (one or both)", "Painful scrotum", "Reluctance to move", "Fever", "Loss of appetite", "Infertility in bulls"],
+                treatment: "Veterinary diagnosis is essential. Treatment involves a long course of antibiotics (e.g., Long-acting Oxytetracycline) and potent NSAIDs (e.g., Flunixin Meglumine).",
+                supportive_treatment: "Strict rest is required. Cold water hydrotherapy (hosing the scrotum with cold water) can help reduce swelling and pain in the early stages.",
+                prevention: "Prevent trauma to the scrotum. Maintain good hygiene. Control infectious diseases like Brucellosis."
+            },
+             {
+                name: "Balanoposthitis (Inflammation of Penis/Prepuce)",
+                symptoms: ["Swelling of the prepuce (sheath)", "Pus or foul-smelling discharge from the sheath", "Painful urination", "Reluctance to breed", "Inability to extend penis"],
+                treatment: "Requires veterinary examination. Treatment involves gentle cleaning (douching) of the prepuce and a course of systemic antibiotics (e.g., Penicillin-Streptomycin) and NSAIDs (e.g., Ketoprofen).",
+                supportive_treatment: "Sexual rest is mandatory. Application of soothing antiseptic ointments inside the sheath can aid healing.",
+                prevention: "Maintain good hygiene in bull housing. Prevent physical injury. Trim long hair around the preputial opening."
+            },
+            {
+                name: "Retained Placenta (RP)",
+                symptoms: ["Fetal membranes hanging from vulva >12h", "Foul-smelling discharge from vulva", "Straining", "Loss of appetite", "Fever"],
+                treatment: "Do NOT manually pull out the placenta. A vet may administer hormonal injections (Oxytocin or PGF2α) and intrauterine antibiotic boluses.",
+                supportive_treatment: "Administer NSAIDs if there is fever or pain. Calcium supplements can help improve uterine tone. B-complex can help with appetite.",
+                prevention: "Ensure balanced nutrition (Vitamin E, Selenium). Avoid calving difficulties."
+            },
+            {
+                name: "Prolapse (Uterine/Vaginal)",
+                symptoms: ["Large pink/red mass protruding from vulva"],
+                treatment: "This is a life-threatening emergency requiring immediate veterinary assistance. The vet will clean, replace the organ, and place stitches (e.g., Buhner's suture).",
+                supportive_treatment: "A vet will administer an epidural anesthetic to stop straining. Systemic antibiotics and NSAIDs are given post-replacement to prevent infection and reduce swelling.",
+                prevention: "Maintain proper body condition. Provide a balanced mineral diet."
+            },
+            {
+                name: "Anoestrus (Not Cycling)",
+                symptoms: ["Not showing signs of heat", "Failure to get pregnant", "Irregular cycles"],
+                treatment: "Requires veterinary diagnosis to determine the cause. Treatment is cause-specific and may involve a hormone protocol (e.g., CIDR, GnRH, PGF2α).",
+                supportive_treatment: "The primary support is nutritional. Ensure a high-quality diet with a balanced mineral mixture. Liver tonics and B-complex can help improve metabolic state.",
+                prevention: "Ensure a positive energy balance after calving. Provide a good quality mineral mixture."
+            },
+            // Skin Diseases
+            {
+                name: "Ringworm",
+                symptoms: ["Circular, scaly, hairless patches", "Greyish-white crusts", "Lesions on head, neck, and around eyes", "Usually not itchy"],
+                treatment: "Topical antifungal ointments are effective. <strong>Generic:</strong> Miconazole or Povidone-Iodine. Scrub lesions to remove crusts before applying medication.",
+                supportive_treatment: "Improving nutrition and providing Vitamin A and Zinc can boost skin immunity and speed up recovery.",
+                prevention: "Isolate infected animals. Disinfect housing, feeding troughs, and equipment."
+            },
+             {
+                name: "Cow Pox",
+                symptoms: ["Lesions on teats/udder", "Fever", "Painful udder", "Blisters on teats developing into scabs"],
+                treatment: "Supportive care is the main treatment. Clean lesions with a mild antiseptic (e.g., Povidone-Iodine) and apply an emollient cream to keep teats soft.",
+                supportive_treatment: "Use NSAIDs for pain and fever. Milk infected cows last to prevent spread. Ensure good milking hygiene.",
+                prevention: "Isolate infected animals. Milkers MUST wear gloves as the disease is zoonotic. Control rodent populations."
+            },
+            {
+                name: "Nasal Granuloma (Allergic Rhinitis)",
+                symptoms: ["Snoring sound", "Difficulty breathing", "Sneezing", "Rubbing nose", "Clear, watery nasal discharge", "Small nodules inside nostrils"],
+                treatment: "Treatment is aimed at reducing the allergic reaction. <strong>Generic:</strong> Antihistamines. In severe cases, a vet may prescribe corticosteroids like Dexamethasone. <strong>Example Brands:</strong> Antihista-Vet (ACI), Dexavet (Tekno).",
+                supportive_treatment: "No specific supportive care needed beyond primary treatment.",
+                prevention: "Identify and reduce exposure to potential allergens like pollen, dust, and fungal spores."
+            },
+            {
+                name: "Humpsore (Stephanofilariasis)",
+                symptoms: ["Chronic sores on hump/neck", "Ulcerative skin lesions", "Intense itching", "Hair loss around sores", "Bleeding from lesions", "Restlessness"],
+                treatment: "Systemic injections of Ivermectin or Doramectin are used. Topical ointments containing organophosphates (e.g., Trichlorfon) can be applied under strict veterinary supervision. <strong>Example Brands:</strong> Ivermec, Neguvon Ointment.",
+                supportive_treatment: "Clean the wounds with antiseptic solution to prevent secondary bacterial infection. Use fly-repellent sprays on and around the wound to prevent re-infestation and aid healing.",
+                prevention: "Effective control of the vector fly (horn fly). Use insecticide ear tags, pour-on solutions, or sprays on the animals during the fly season."
+            },
+            // Metabolic & Deficiency Diseases
+            {
+                name: "Bloat (Ruminal Tympany)",
+                symptoms: ["Distended left abdomen", "Difficulty breathing", "Discomfort/Pain", "Grunting", "Loss of appetite", "Sudden death", "Restlessness", "Kicking at belly"],
+                treatment: "For frothy bloat, administer an anti-bloat agent. <strong>Example Brands:</strong> Bloat Stop (ACI), Bloatosil (Techno Drugs). For gas bloat, a vet can pass a stomach tube.",
+                supportive_treatment: "After the emergency is resolved, provide rumenotorics or probiotics to help restore normal rumen function. Reintroduce feed slowly, starting with good quality hay.",
+                prevention: "Manage grazing on lush pastures. Introduce new feeds gradually."
+            },
+             {
+                name: "Milk Fever (Hypocalcemia)",
+                symptoms: ["Staggering/Wobbling", "Muscle tremors", "Lying down (often with head to side)", "Cold ears", "Depression", "Weakness", "Inability to stand", "Secondary bloat"],
+                treatment: "This is an emergency. A vet must administer calcium borogluconate solution slowly via intravenous (IV) route.",
+                supportive_treatment: "After IV calcium, provide an oral calcium source to prevent relapse. Keep the cow comfortable on deep bedding. Monitor for secondary issues like bloat or mastitis.",
+                prevention: "Proper dry cow nutrition. Provide oral calcium gels at calving. <strong>Example Brands:</strong> Cal-P Gel, Calstrong."
+            },
+            {
+                name: "Grass Tetany (Magnesium Deficiency)",
+                symptoms: ["Muscle tremors", "Staggering/Wobbling", "Hypersensitivity to sound/touch", "Convulsions/Seizures", "Restlessness", "Aggression", "Sudden death"],
+                treatment: "This is an emergency requiring immediate veterinary care. A vet will administer a solution of Magnesium Sulphate, often combined with Calcium, very slowly IV.",
+                supportive_treatment: "Keep the animal in a quiet, calm environment to avoid triggering more seizures. Provide oral magnesium supplements after initial recovery.",
+                prevention: "Provide a magnesium supplement, especially when grazing lush pastures, through mineral licks or dusting pastures."
+            },
+            {
+                name: "Vitamin A Deficiency",
+                symptoms: ["Night blindness", "Rough hair coat", "Watery eye discharge", "Poor growth", "Birth of weak or dead calves", "Diarrhea"],
+                treatment: "Administer an injectable Vitamin A supplement. <strong>Generic:</strong> Vitamin A, D3, E injection. <strong>Example Brands:</strong> AD3E-Vet (ACI). <strong>Dose:</strong> 1-2 million IU for an adult cow.",
+                supportive_treatment: "Treat any secondary infections like diarrhea or pneumonia. Improve the quality of the diet with green forage.",
+                prevention: "Ensure access to green forage. If feeding dry fodder, supplement with a vitamin-mineral mix."
+            },
+            {
+                name: "White Muscle Disease (Vit E/Selenium Deficiency)",
+                symptoms: ["Stiffness", "Weakness", "Muscle tremors", "Difficulty standing (especially in calves)", "Sudden death after exertion"],
+                treatment: "Administer an injectable product containing Vitamin E and Selenium. <strong>Example Brands:</strong> E-Sel (Tekno), Sel-E-Vet. <strong>Dose:</strong> 1 ml per 20-40 kg body weight for calves.",
+                supportive_treatment: "Provide complete rest. Ensure the calf can suckle or is hand-fed. Handle affected animals carefully to avoid causing muscle damage.",
+                prevention: "Supplement pregnant cows with Vitamin E and Selenium. Provide a good quality mineral mix."
+            },
+            {
+                name: "Phosphorus Deficiency",
+                symptoms: ["Pica (eating bones, wood, soil)", "Poor growth", "Poor fertility / Anoestrus", "Lameness", "Stiffness", "Weak or broken bones", "Reduced milk yield"],
+                treatment: "Administer an injectable Phosphorus supplement for acute cases. <strong>Example Brands:</strong> Phos-Vet, Catasol. <strong>Dose:</strong> 10-15 ml per adult animal IM.",
+                supportive_treatment: "The primary treatment is the support. Long-term correction requires dietary supplementation with a balanced mineral mixture.",
+                prevention: "Provide a balanced mineral mixture in the feed. <strong>Example Brands:</strong> ACI Mineral Mixture, Renata Mineral Mix."
+            },
+            {
+                name: "Copper Deficiency",
+                symptoms: ["Faded coat color (reddish/brownish)", "Hair loss around eyes ('Spectacles')", "Diarrhea", "Poor growth", "Anemia (pale gums/eyes)", "Poor fertility / Anoestrus"],
+                treatment: "Treatment can be via injectable Copper supplements or long-acting copper oxide boluses given orally. A vet should diagnose and recommend the best course.",
+                supportive_treatment: "Provide a high-quality diet and a complete mineral mix to address any concurrent deficiencies.",
+                prevention: "Regularly provide a complete mineral mixture containing copper. Avoid excess molybdenum and sulfur."
+            },
+            {
+                name: "Cobalt Deficiency (Pine)",
+                symptoms: ["Progressive weight loss", "Anemia (pale gums/eyes)", "Watery eye discharge", "Poor growth", "Loss of appetite", "Rough hair coat"],
+                treatment: "Administer injectable Vitamin B12. <strong>Example Brands:</strong> B12-Vet, Neuro-B. <strong>Dose:</strong> 5-10 ml IM for adult cattle.",
+                supportive_treatment: "Provide a highly palatable and energy-dense diet to encourage eating and help regain weight.",
+                prevention: "Provide a mineral supplement containing cobalt. Vitamin B12 injections can be given at regular intervals."
+            },
+            {
+                name: "Iodine Deficiency (Goiter)",
+                symptoms: ["Swelling of neck (enlarged thyroid/Goiter)", "Birth of weak, hairless, or dead calves", "Poor growth", "Poor fertility / Anoestrus"],
+                treatment: "Provide an iodine supplement, often via iodized salt in a mineral lick or by adding potassium iodide to the feed.",
+                supportive_treatment: "Ensure newborn calves can suckle, as they may be weak. Provide a warm, dry environment.",
+                prevention: "Ensure routine access to iodized salt or a mineral mixture containing adequate levels of iodine."
+            },
+            {
+                name: "Calf Scours (Diarrhea)",
+                symptoms: ["Watery/loose feces (diarrhea)", "Dehydration (sunken eyes)", "Weakness", "Inability to stand", "Loss of appetite", "Depression"],
+                treatment: "Fluid therapy is the most important treatment. Give oral rehydration salts (ORS) multiple times a day. <strong>Example Brands:</strong> Electrovit (ACI), Glucolyte Vet (Renata).",
+                supportive_treatment: "Keep the calf warm and dry. Continue to feed milk or milk replacer in small, frequent meals. Probiotics can help restore healthy gut flora.",
+                prevention: "Ensure calves receive adequate high-quality colostrum within the first 6 hours of birth. Maintain a clean calving environment."
+            },
+             // Poisoning & Toxicities
+            {
+                name: "Urea Poisoning",
+                symptoms: ["Muscle tremors", "Abdominal pain", "Frothy saliva", "Bellowing", "Staggering/Wobbling", "Difficulty breathing", "Convulsions/Seizures", "Sudden death"],
+                treatment: "This is a severe emergency. Immediately drench with cold water and acetic acid (vinegar). <strong>Dose:</strong> 2-4 liters of 5% vinegar mixed with 20-30 liters of cold water for an adult cow.",
+                supportive_treatment: "A vet can provide IV fluids to support the kidneys and manage shock. Rumenotorics can be given during recovery.",
+                prevention: "Never allow direct access to urea fertilizer. Introduce urea-containing feeds gradually and ensure it is thoroughly mixed."
+            },
+            {
+                name: "Selenium Poisoning",
+                symptoms: ["(Acute) Staggering/Wobbling, Depression, Difficulty breathing, Diarrhea, Sudden death", "(Chronic) Hair loss (tail/mane), Hoof deformities/cracks, Lameness, Stiffness, Weight loss"],
+                treatment: "There is no specific antidote. Treatment is supportive. Remove the source of selenium immediately.",
+                supportive_treatment: "Provide high-protein feed and plenty of fresh water. A veterinarian can provide IV fluids and other care to support organ function.",
+                prevention: "Know the selenium status of your area's soil and forages. Do not over-supplement with selenium."
+            },
+            {
+                name: "Hydrocyanide (HCN) Poisoning",
+                symptoms: ["Bright red gums/blood", "Difficulty breathing", "Muscle tremors", "Staggering/Wobbling", "Convulsions/Seizures", "Sudden death (very rapid)"],
+                treatment: "This is a dire emergency requiring immediate veterinary intervention. The specific antidote involves the intravenous injection of Sodium Nitrite followed by Sodium Thiosulfate.",
+                supportive_treatment: "The antidote is the primary treatment. Supportive care involves managing seizures and providing oxygen if possible.",
+                prevention: "Do not graze cattle on young, wilted, or frost-damaged sorghum, Johnson grass, or similar forages."
+            },
+            {
+                name: "Nitrate/Nitrite Poisoning",
+                symptoms: ["Brown/chocolate-colored blood/gums", "Rapid/shallow breathing", "Weakness", "Staggering/Wobbling", "Muscle tremors", "Sudden death", "Abortion"],
+                treatment: "Emergency veterinary treatment is required. The specific antidote is a slow intravenous injection of 1% Methylene Blue solution. <strong>Dose:</strong> 1-2 mg per kg body weight.",
+                supportive_treatment: "Keep the animal calm and quiet to reduce oxygen demand. A veterinarian may provide additional supportive care for shock.",
+                prevention: "Test forages for high nitrate levels. Avoid feeding high-nitrate forages or dilute them with safe feedstuffs."
+            }
+        ];
+
+        const symptomsListContainer = document.getElementById('symptoms-list');
+        const diagnoseBtn = document.getElementById('diagnose-btn');
+        const resultsContainer = document.getElementById('results');
+        const resultsList = document.getElementById('results-list');
+        const noResultsMessage = document.getElementById('no-results');
+        const diseaseDropdown = document.getElementById('disease-dropdown');
+        const showDiseaseBtn = document.getElementById('show-disease-btn');
+
+
+        // --- PAGE INITIALIZATION ---
+        function initializePage() {
+            // Populate Symptoms
+            const allSymptoms = new Set();
+            diseaseData.forEach(disease => {
+                disease.symptoms.forEach(symptom => allSymptoms.add(symptom));
+            });
+            const sortedSymptoms = Array.from(allSymptoms).sort();
+            sortedSymptoms.forEach(symptom => {
+                const symptomId = symptom.replace(/[\s/()']/g, '-').toLowerCase();
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    <input type="checkbox" id="${symptomId}" value="${symptom}" class="symptom-checkbox hidden">
+                    <label for="${symptomId}" class="block border-2 border-gray-300 rounded-lg p-3 text-center text-sm font-medium cursor-pointer hover:bg-gray-200 transition-colors duration-200 h-full flex items-center justify-center">${symptom}</label>
+                `;
+                symptomsListContainer.appendChild(div);
+            });
+
+            // Populate Disease Dropdown
+            const sortedDiseases = [...diseaseData].sort((a, b) => a.name.localeCompare(b.name));
+            diseaseDropdown.innerHTML = '<option value="">-- Select a Disease --</option>'; // Default option
+            sortedDiseases.forEach(disease => {
+                const option = document.createElement('option');
+                option.value = disease.name;
+                option.textContent = disease.name;
+                diseaseDropdown.appendChild(option);
+            });
+        }
+        
+        // --- EVENT LISTENERS ---
+        function renderResults(results) {
+            resultsContainer.classList.remove('hidden');
+            resultsList.innerHTML = ''; 
+
+            if (results.length > 0) {
+                noResultsMessage.classList.add('hidden');
+                results.forEach((result, index) => {
+                    const isTopMatch = result.matchCount > 0 && index === 0;
+                    const isDirectLookup = !result.hasOwnProperty('matchCount');
+
+                    let cardClass = 'border border-gray-200 rounded-lg overflow-hidden shadow-sm';
+                    let headerClass = 'p-4 bg-gray-50 border-b';
+                    let headerContent = `<h3 class="text-xl font-bold text-gray-700">${result.name}</h3>`;
+
+                    if (isTopMatch) {
+                        cardClass = 'border-2 border-blue-500 rounded-lg overflow-hidden shadow-lg bg-blue-50';
+                        headerClass = 'p-4 bg-blue-100 border-b border-blue-200';
+                        headerContent = `
+                            <div class="flex justify-between items-center flex-wrap gap-2">
+                                <h3 class="text-xl font-bold text-blue-800">${result.name}</h3>
+                                <span class="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">Top Match</span>
+                            </div>
+                            <p class="text-sm font-medium text-gray-700 mt-1">Matched ${result.matchCount} of ${document.querySelectorAll('.symptom-checkbox:checked').length} selected symptoms.</p>`;
+                    } else if(isDirectLookup) {
+                        cardClass = 'border-2 border-green-500 rounded-lg overflow-hidden shadow-lg bg-green-50';
+                        headerClass = 'p-4 bg-green-100 border-b border-green-200';
+                        headerContent = `<h3 class="text-xl font-bold text-green-800">${result.name}</h3>`;
+                    } else if (result.matchCount > 0) {
+                         headerContent += `<p class="text-sm font-medium text-gray-600 mt-1">Matched ${result.matchCount} of ${document.querySelectorAll('.symptom-checkbox:checked').length} selected symptoms.</p>`;
+                    }
+
+                    const symptomsHtml = isDirectLookup 
+                        ? `<div><h4 class="font-semibold text-gray-800">Common Symptoms:</h4><p class="text-gray-700 text-sm">${result.symptoms.join(', ')}</p></div>`
+                        : `<div><h4 class="font-semibold text-gray-800">Matched Symptoms:</h4><p class="text-gray-700 text-sm">${result.matchedSymptoms.join(', ')}</p></div>`;
+
+                    const resultCard = document.createElement('div');
+                    resultCard.className = cardClass;
+                    resultCard.innerHTML = `
+                        <div class="${headerClass}">${headerContent}</div>
+                        <div class="p-4 space-y-4">
+                            ${symptomsHtml}
+                            <div><h4 class="font-semibold text-gray-800">Possible Treatment:</h4><p class="text-gray-700 text-sm">${result.treatment}</p></div>
+                            <div><h4 class="font-semibold text-gray-800">Supportive Treatment:</h4><p class="text-gray-700 text-sm">${result.supportive_treatment}</p></div>
+                            <div><h4 class="font-semibold text-gray-800">Prevention:</h4><p class="text-gray-700 text-sm">${result.prevention}</p></div>
+                        </div>`;
+                    resultsList.appendChild(resultCard);
+                });
+            } else {
+                 noResultsMessage.classList.remove('hidden');
+            }
+            resultsContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+
+        diagnoseBtn.addEventListener('click', () => {
+            const selectedSymptoms = Array.from(document.querySelectorAll('.symptom-checkbox:checked')).map(cb => cb.value);
+
+            if (selectedSymptoms.length === 0) {
+                alert("Please select at least one symptom.");
+                return;
+            }
+
+            const diagnosisResults = diseaseData.map(disease => {
+                const matchedSymptoms = disease.symptoms.filter(symptom => selectedSymptoms.includes(symptom));
+                return { ...disease, matchCount: matchedSymptoms.length, matchedSymptoms: matchedSymptoms };
+            })
+            .filter(disease => disease.matchCount > 0)
+            .sort((a, b) => b.matchCount - a.matchCount);
+
+            document.getElementById('results').querySelector('h2').textContent = '2. Diagnosis Results';
+            renderResults(diagnosisResults);
+        });
+
+        showDiseaseBtn.addEventListener('click', () => {
+            const selectedDiseaseName = diseaseDropdown.value;
+
+            if (!selectedDiseaseName) {
+                alert("Please select a disease from the list.");
+                return;
+            }
+
+            const disease = diseaseData.find(d => d.name === selectedDiseaseName);
+            if (disease) {
+                document.getElementById('results').querySelector('h2').textContent = `Details for ${disease.name}`;
+                renderResults([disease]);
+            }
+        });
+
+        // Run initialization on page load
+        initializePage();
+    </script>
+
+</body>
+</html>
